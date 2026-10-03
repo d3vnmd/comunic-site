@@ -1,0 +1,251 @@
+const SB_URL='https://mefuakmklbuzqroerzre.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZnVha21rbGJ1enFyb2VyenJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MzEyNTEsImV4cCI6MjEwNjUwNzI1MX0.uR6iwXzcCen5Ws7nHrGx_zMjGRzHeWGQHDPuAhkY204';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const $=i=>document.getElementById(i);
+const FONTS=['Inter','Pacifico','Bebas Neue','Caveat','Orbitron'];
+const THEMES=['warm','dark','light','ocean','sunset'];
+let me,prof,friends=[],cur=null,seen={},tab='home',rec,chunks=[],started=false,lastSend=0,priv=null,keyCache={};
+
+/* ---------- helpers ---------- */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeColor=c=>/^#[0-9a-f]{6}$/i.test(c)?c:'#ffffff';
+const gc=c=>{c=safeColor(c);return c==='#ffffff'?'var(--text)':c};
+const safeFont=f=>FONTS.includes(f)?f:'Inter';
+function nameHTML(p){return `<span class="nm" style="font-family:'${safeFont(p.font)}',sans-serif;background-image:linear-gradient(90deg,${gc(p.color1)},${gc(p.color2)})">${esc(p.display_name||p.username)}</span>`+(p.is_admin?'<span class="bdg">🛡️</span>':'')+(p.badge?`<span class="bdg">${esc(p.badge)}</span>`:'')}
+function avHTML(p,big){const c='av'+(big?' l':'');return p.avatar_url?`<img class="${c}" src="${esc(p.avatar_url)}">`:`<div class="${c}">${esc((p.username||'?')[0].toUpperCase())}</div>`}
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.theme=t}catch(e){}}
+function hideLoader(){const l=$('loader');if(l)l.classList.add('gone')}
+function cool(ts,d){const n=ts?new Date(ts).getTime()+d*864e5:0;return n>Date.now()?'Дараа нь солих: '+new Date(n).toLocaleDateString():'Одоо солих боломжтой'}
+
+/* ---------- Auth (Discord only) ---------- */
+function discordLogin(){sb.auth.signInWithOAuth({provider:'discord',options:{redirectTo:location.origin+location.pathname}})}
+(function(){const q=new URLSearchParams(location.search+'&'+location.hash.replace(/^#/,'')),e=q.get('error_description');if(e)$('amsg').textContent='Нэвтрэх алдаа: '+e})();
+const cleanName=x=>{x=String(x||'user').toLowerCase().replace(/[^a-z0-9_]/g,'_').slice(0,20);return x.length<3?x+'_usr':x};
+async function makeProfile(u){
+  const m=u.user_metadata||{},base=cleanName(m.full_name||m.user_name||m.name);let un=base;
+  for(let i=0;i<4;i++){
+    const r=await sb.from('profiles').insert({id:u.id,username:un,display_name:(m.custom_claims&&m.custom_claims.global_name)||m.full_name||un,avatar_url:m.avatar_url||m.picture||null,username_set:true}).select().single();
+    if(r.data)return r.data;
+    if(r.error&&r.error.code==='23505'){const ex=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();if(ex.data)return ex.data;un=base.slice(0,14)+'_'+Math.random().toString(36).slice(2,7)}else break;
+  }
+  return null;
+}
+async function start(u){
+  if(started)return;started=true;me=u;
+  const r=await sb.from('profiles').select('*').eq('id',u.id).maybeSingle();prof=r.data;
+  if(!prof)prof=await makeProfile(u);
+  if(!prof){started=false;hideLoader();$('auth').classList.remove('hide');$('amsg').textContent='Профайл үүсгэж чадсангүй. SQL patch-ууд ажилласан эсэхийг шалгана уу.';return}
+  $('auth').classList.add('hide');$('app').classList.remove('hide');
+  if(prof.banned){alert('Таны эрх хаагдсан байна');await sb.auth.signOut();location.reload();return}
+  if(prof.is_admin&&!document.querySelector('[data-t=admin]')){const ab=document.createElement('button');ab.dataset.t='admin';ab.textContent='🛡️ Админ';ab.onclick=()=>show('admin');$('tabs').appendChild(ab)}
+  await initKeys();hideLoader();
+  sb.channel('msgs').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},x=>{
+    const m=x.new;if(cur&&(m.sender===cur.id||m.receiver===cur.id))addMsg(m);
+    if(m.sender!==me.id&&(!cur||cur.id!==m.sender))notify(m)}).subscribe();
+  show('home');
+}
+sb.auth.onAuthStateChange((ev,sess)=>{if(sess&&sess.user)start(sess.user)});
+sb.auth.getSession().then(r=>{if(r.data.session)start(r.data.session.user);else hideLoader()});
+setTimeout(hideLoader,8000);
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+function show(t){tab=t;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  if(t==='home')home();else if(t==='find')find();else if(t==='admin')admin();else profile()}
+
+/* ---------- Home ---------- */
+async function getRel(){const r=await sb.from('friendships').select('*'),map={};(r.data||[]).forEach(f=>{map[f.requester===me.id?f.addressee:f.requester]=f});return map}
+async function home(){
+  const rel=await getRel(),ids=Object.keys(rel).filter(k=>rel[k].status==='accepted');
+  friends=ids.length?(await sb.from('profiles').select('*').in('id',ids)).data||[]:[];
+  const day=Date.now()-864e5;
+  let h=(localStorage.permAsked?'':'<div class="row" onclick="askPerms()">🔔 Мэдэгдэл, камер, микрофон зөвшөөрөх</div>')+'<h3>Нотууд</h3><div id="notes">';
+  h+=`<div class="note" onclick="show('me')"><div class="bub">${esc(prof.note_text||'+ Нот')}${prof.note_audio?' 🎧':''}</div>${avHTML(prof)}<div>Би</div></div>`;
+  friends.forEach(f=>{if((f.note_text||f.note_audio)&&new Date(f.note_at).getTime()>day)h+=`<div class="note" onclick="playNote('${f.id}')"><div class="bub">${esc(f.note_text||'')}${f.note_audio?' 🎧':''}</div>${avHTML(f)}<div>${esc(f.username)}</div></div>`});
+  h+='</div><h3>Чатууд</h3>';
+  if(!friends.length)h+='<p style="color:var(--muted)">Найз байхгүй байна. "Найз" цэсээс хайж нэм.</p>';
+  friends.forEach(f=>{h+=`<div class="row" onclick="openChat('${f.id}')">${avHTML(f)}<div class="g">${nameHTML(f)}<small>@${esc(f.username)}</small></div></div>`});
+  $('main').innerHTML=h;
+}
+function playNote(id){const f=friends.find(x=>x.id===id);if(f&&f.note_audio)new Audio(f.note_audio).play()}
+
+/* ---------- Find friends ---------- */
+async function find(){
+  $('main').innerHTML='<input id="q" placeholder="Username-аар хайх..." oninput="doSearch()"><div id="req"></div><h3 id="fh">Шинээр нэгдсэн</h3><div id="res"></div>';
+  const rel=await getRel();window._rel=rel;
+  const inc=Object.keys(rel).filter(k=>rel[k].status==='pending'&&rel[k].addressee===me.id);
+  if(inc.length){const ps=(await sb.from('profiles').select('*').in('id',inc)).data||[];
+    $('req').innerHTML='<h3>Ирсэн хүсэлт</h3>'+ps.map(p=>`<div class="row">${avHTML(p)}<div class="g">${nameHTML(p)}<small>@${esc(p.username)}</small></div><button class="btn s" onclick="accept('${rel[p.id].id}')">Зөвшөөрөх</button></div>`).join('')}
+  doSearch();
+}
+let st;function doSearch(){clearTimeout(st);st=setTimeout(runSearch,250)}
+async function runSearch(){
+  const q=(($('q')&&$('q').value)||'').toLowerCase().replace(/[^a-z0-9_]/g,'');
+  let b=sb.from('profiles').select('*').neq('id',me.id);
+  b=q?b.ilike('username','%'+q+'%').limit(20):b.order('created_at',{ascending:false}).limit(20);
+  const r=await b;if(!$('res'))return;$('fh').textContent=q?'Үр дүн':'Шинээр нэгдсэн';const rel=window._rel||{};
+  $('res').innerHTML=(r.data||[]).map(p=>{const f=rel[p.id];let btn;
+    if(!f)btn=`<button class="btn s" onclick="addFriend('${p.id}',this)">Нэмэх</button>`;
+    else if(f.status==='accepted')btn='<small>✓ Найз</small>';
+    else btn=`<small>${f.requester===me.id?'Илгээсэн':'Хүлээж байна'}</small>`;
+    return `<div class="row">${avHTML(p)}<div class="g">${nameHTML(p)}<small>@${esc(p.username)}</small></div>${btn}</div>`}).join('')||'<p style="color:var(--muted)">Олдсонгүй</p>';
+}
+async function addFriend(id,b){b.disabled=true;const r=await sb.from('friendships').insert({requester:me.id,addressee:id});b.outerHTML=`<small>${r.error?(/rate_limit/.test(r.error.message)?'Хэт олон хүсэлт':'Алдаа'):'Илгээсэн'}</small>`}
+async function accept(id){await sb.from('friendships').update({status:'accepted'}).eq('id',id);find()}
+
+/* ---------- Chat ---------- */
+async function openChat(id){
+  cur=friends.find(f=>f.id===id);seen={};
+  $('cinfo').innerHTML=avHTML(cur)+nameHTML(cur);lockUI();$('msgs').innerHTML='';$('chat').classList.remove('hide');
+  const r=await sb.from('messages').select('*').or(`and(sender.eq.${me.id},receiver.eq.${id}),and(sender.eq.${id},receiver.eq.${me.id})`).order('created_at').limit(200);
+  (r.data||[]).forEach(addMsg);
+}
+function closeChat(){cur=null;$('chat').classList.add('hide')}
+function addMsg(m){
+  if(seen[m.id])return;seen[m.id]=1;
+  const d=document.createElement('div');d.className='m'+(m.sender===me.id?' me':'');$('msgs').appendChild(d);
+  fill(d,m).then(()=>{
+    if(m.sender!==me.id){const b=document.createElement('button');b.className='rp';b.textContent='⚑';b.title='Report';b.onclick=()=>report(m,d.dataset.t||'');d.appendChild(b)}
+    $('msgs').scrollTop=$('msgs').scrollHeight});
+}
+async function fill(d,m){
+  try{
+    if(m.audio_url){
+      if(m.enc){const pt=await dec(await (await fetch(m.audio_url)).arrayBuffer(),await sharedKey(cur));addAudio(d,URL.createObjectURL(new Blob([pt],{type:m.mime||'audio/webm'})),true)}
+      else addAudio(d,m.audio_url,false);
+    }else if(m.image_url){const im=document.createElement('img');im.src=m.image_url;im.className='pic';d.appendChild(im)}
+    else{let t=m.body;if(m.enc)t=new TextDecoder().decode(await dec(Uint8Array.from(atob(m.body),c=>c.charCodeAt(0)),await sharedKey(cur)));d.dataset.t=t;d.appendChild(document.createTextNode(t))}
+  }catch(e){d.textContent='🔒 Тайлах боломжгүй'}
+}
+function addAudio(d,src,lock){const a=document.createElement('audio');a.controls=true;a.src=src;if(lock){a.setAttribute('controlsList','nodownload noplaybackrate');a.oncontextmenu=e=>e.preventDefault()}d.appendChild(a);if(lock){const l=document.createElement('small');l.textContent=' 🔒';d.appendChild(l)}}
+async function sendRow(row){
+  const r=await sb.from('messages').insert({sender:me.id,receiver:cur.id,...row}).select().single();
+  if(r.data)addMsg(r.data);else alert(r.error&&/rate_limit/.test(r.error.message)?'Хэт хурдан илгээж байна, түр хүлээнэ үү':r.error&&/banned/.test(r.error.message)?'Таны эрх хаагдсан байна':'Илгээж чадсангүй');
+}
+async function sendText(){
+  const t=$('ctext').value.trim();if(!t||!cur||Date.now()-lastSend<500)return;lastSend=Date.now();$('ctext').value='';
+  if(encOn()){const o=await enc(new TextEncoder().encode(t),await sharedKey(cur));sendRow({body:b64(o),enc:true})}else sendRow({body:t});
+}
+$('ctext').addEventListener('keydown',e=>{if(e.key==='Enter')sendText()});
+async function sendVoice(blob,type){
+  if(encOn()){const o=await enc(new Uint8Array(await blob.arrayBuffer()),await sharedKey(cur)),u=await upload('voice',new Blob([o]),'application/octet-stream');if(u)sendRow({audio_url:u,enc:true,mime:type})}
+  else{const u=await upload('voice',blob,type);if(u)sendRow({audio_url:u})}
+}
+async function sendImg(i){const f=i.files[0];i.value='';if(!f||!cur)return;if(encOn()){alert('E2EE горимд зураг илгээх боломжгүй');return}const u=await upload('voice',f,f.type);if(u)sendRow({image_url:u})}
+$('emo').innerHTML='😀 😂 🤣 😍 🥰 😎 🤔 😭 😡 👍 👎 🙏 👏 🔥 💯 ❤️ 💔 🎉 ✨ 🌹 😴 🤯 🥳 😅 🤝 💪 👀 🙌 😘 😇 🤗 😜 🍕 ☕ 🎵 ⚽ 🇲🇳'.split(' ').map(e=>`<span>${e}</span>`).join('');
+$('emo').onclick=e=>{if(e.target.tagName==='SPAN'){$('ctext').value+=e.target.textContent;$('ctext').focus()}};
+
+/* ---------- Voice + upload ---------- */
+async function upload(bucket,blob,type){
+  const ext=type.includes('mp4')?'m4a':type.includes('webm')?'webm':type.includes('png')?'png':type.includes('jpeg')?'jpg':type.includes('gif')?'gif':type.includes('webp')?'webp':'bin';
+  const path=`${me.id}/${Date.now()}.${ext}`,r=await sb.storage.from(bucket).upload(path,blob,{contentType:type});
+  if(r.error){alert('Upload алдаа');return null}
+  return sb.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+async function toggleRec(btn,done){
+  if(rec&&rec.state==='recording'){rec.stop();return}
+  let s;try{s=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){alert('Микрофоны зөвшөөрөл өгнө үү');return}
+  rec=new MediaRecorder(s);chunks=[];rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=()=>{s.getTracks().forEach(t=>t.stop());btn.classList.remove('rec');const type=rec.mimeType||'audio/webm';done(new Blob(chunks,{type}),type)};
+  rec.start();btn.classList.add('rec');setTimeout(()=>{if(rec&&rec.state==='recording')rec.stop()},60000);
+}
+
+/* ---------- Profile ---------- */
+function profile(){
+  const p=prof;
+  $('main').innerHTML=`<div style="text-align:center"><div id="pav">${avHTML(p,true)}</div><p><label class="btn s" style="display:inline-block;margin-top:8px;cursor:pointer">Зураг солих<input type="file" id="pf" accept="image/*" class="hide" onchange="setAvatar(this)"></label></p><p id="prev" style="margin-top:10px;font-size:26px">${nameHTML(p)}</p></div>
+  <h3>Username (сард 1 удаа)</h3><input id="un" value="${esc(p.username)}" maxlength="20" autocapitalize="none"><small style="color:var(--muted)">${cool(p.username_changed_at,30)}</small>
+  <h3>Нэр (7 хоногт 1 удаа)</h3><input id="dn" value="${esc(p.display_name||p.username)}" maxlength="30" oninput="prevName()"><small style="color:var(--muted)">${cool(p.name_changed_at,7)}</small>
+  <h3>Тема</h3><select onchange="setTheme(this.value)">${THEMES.map(t=>`<option${t===document.documentElement.dataset.theme?' selected':''}>${t}</option>`).join('')}</select>
+  <h3>Фонт ба градиент өнгө</h3><select id="fo" onchange="prevName()">${FONTS.map(f=>`<option${f===p.font?' selected':''}>${f}</option>`).join('')}</select>
+  <div class="cr"><input type="color" id="c1" value="${safeColor(p.color1)}" oninput="prevName()"><input type="color" id="c2" value="${safeColor(p.color2)}" oninput="prevName()"></div>
+  <h3>Нот (24 цаг харагдана)</h3><input id="nt" maxlength="60" placeholder="Юу бодож байна?" value="${esc(p.note_text||'')}">
+  <div class="cr" style="align-items:center"><button class="mic" onclick="toggleRec(this,setVoiceNote)">🎤</button><span id="vn" style="color:var(--muted);font-size:14px">${p.note_audio?'Дуут нот байна ✓':'Дуут нот бичих'}</span></div>
+  <div class="cr"><button class="btn" style="flex:1" onclick="saveProfile()">Хадгалах</button><button class="btn s" onclick="clearNote()">Нот арилгах</button></div>
+  <p id="ps" style="color:var(--b);min-height:22px"></p><button class="btn s" onclick="askPerms()">🔔 Зөвшөөрөл</button> <button class="btn s" onclick="sb.auth.signOut().then(()=>location.reload())">Гарах</button>
+  <p class="fine" style="margin-top:16px"><a href="/terms.html">Нөхцөл</a> · <a href="/privacy.html">Нууцлал</a></p>`;
+}
+function prevName(){$('prev').innerHTML=nameHTML({username:prof.username,display_name:$('dn').value,font:$('fo').value,color1:$('c1').value,color2:$('c2').value})}
+async function patchErr(o){const r=await sb.from('profiles').update(o).eq('id',me.id).select().single();if(r.data)prof=r.data;return r.error}
+async function setAvatar(inp){const f=inp.files[0];if(!f)return;const u=await upload('avatars',f,f.type);if(u&&!await patchErr({avatar_url:u}))$('pav').innerHTML=avHTML(prof,true)}
+async function setVoiceNote(blob,type){const u=await upload('voice',blob,type);if(u&&!await patchErr({note_audio:u,note_at:new Date().toISOString()}))$('vn').textContent='Дуут нот хадгалагдлаа ✓'}
+async function saveProfile(){
+  const msg=[];
+  if(await patchErr({font:$('fo').value,color1:$('c1').value,color2:$('c2').value,note_text:$('nt').value.trim()||null,note_at:new Date().toISOString()}))msg.push('Хадгалахад алдаа');
+  const dn=$('dn').value.trim(),un=$('un').value.trim().toLowerCase();
+  if(dn&&dn!==prof.display_name){const e=await patchErr({display_name:dn});if(e)msg.push(/name_cooldown/.test(e.message)?'Нэр: 7 хоногт 1 удаа':'Нэр солиход алдаа')}
+  if(un!==prof.username){
+    if(!/^[a-z0-9_]{3,20}$/.test(un))msg.push('Username: 3-20 тэмдэгт, a-z 0-9 _');
+    else{const e=await patchErr({username:un});if(e)msg.push(/username_cooldown/.test(e.message)?'Username: сард 1 удаа':'Username эзлэгдсэн')}
+  }
+  profile();$('ps').textContent=msg.length?msg.join(' · '):'Хадгалагдлаа ✓';
+}
+async function clearNote(){await patchErr({note_text:null,note_audio:null});profile()}
+
+/* ---------- Permissions + notifications ---------- */
+async function askPerms(){
+  try{localStorage.permAsked=1}catch(e){}
+  try{await Notification.requestPermission()}catch(e){}
+  try{const s=await navigator.mediaDevices.getUserMedia({audio:true,video:true});s.getTracks().forEach(t=>t.stop())}
+  catch(e){try{const s=await navigator.mediaDevices.getUserMedia({audio:true});s.getTracks().forEach(t=>t.stop())}catch(e2){}}
+  if(tab==='home')home();
+}
+function notify(m){
+  if(!window.Notification||Notification.permission!=='granted')return;
+  const f=friends.find(x=>x.id===m.sender);if(!f)return;
+  new Notification(f.display_name||f.username,{body:m.enc?'🔒 Шинэ мессеж':m.body||(m.audio_url?'🎤 Дуут мессеж':'📷 Зураг')});
+}
+
+/* ---------- Report + Admin ---------- */
+async function report(m,snap){
+  const why=prompt('Report-ийн шалтгаан (spam, доромжлол, аюултай агуулга...)');if(!why)return;
+  const r=await sb.from('reports').insert({reporter:me.id,message_id:m.id,reported_user:m.sender,reason:why.slice(0,200),snapshot:(snap||m.image_url||m.audio_url||'').slice(0,500)});
+  alert(r.error?'Илгээж чадсангүй (хэт олон report байж магадгүй)':'Report илгээгдлээ. Баярлалаа.');
+}
+async function admin(){
+  $('main').innerHTML='<h3>🚩 Report-ууд</h3><div id="rl"></div><h3>Хэрэглэгчид</h3><input id="aq" placeholder="Username хайх..." oninput="adminList()"><div id="al"></div>';adminList();
+  const r=await sb.from('reports').select('*').order('created_at',{ascending:false}).limit(20);
+  $('rl').innerHTML=(r.data||[]).map(x=>`<div class="row" style="flex-wrap:wrap"><div class="g"><small>${esc(x.reason||'')}</small>${esc((x.snapshot||'(агуулга байхгүй)').slice(0,200))}</div><button class="btn s" onclick="adm('${x.reported_user}','ban',true);delReport('${x.id}')">🚫 Ban</button><button class="btn s" onclick="delReport('${x.id}')">Хаах</button></div>`).join('')||'<p style="color:var(--muted)">Report байхгүй</p>';
+}
+async function delReport(id){await sb.from('reports').delete().eq('id',id);admin()}
+async function adminList(){
+  const q=($('aq').value||'').toLowerCase().replace(/[^a-z0-9_]/g,'');
+  let b=sb.from('profiles').select('*').order('created_at',{ascending:false}).limit(30);if(q)b=b.ilike('username','%'+q+'%');
+  const r=await b;
+  $('al').innerHTML=(r.data||[]).map(p=>{const i=`adm('${p.id}',`;return `<div class="row" style="flex-wrap:wrap">${avHTML(p)}<div class="g">${nameHTML(p)}<small>@${esc(p.username)}${p.banned?' · БАН':''}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;width:100%"><button class="btn s" onclick="${i}'badge')">🏅 Badge</button><button class="btn s" onclick="${i}'ban',${!p.banned})">${p.banned?'Unban':'🚫 Ban'}</button><button class="btn s" onclick="${i}'avatar')">🖼️ Avatar устгах</button><button class="btn s" onclick="${i}'name')">✏️ Нэр</button><button class="btn s" onclick="${i}'username')">@ Username</button></div></div>`}).join('');
+}
+async function adm(id,act,v){
+  const o={};
+  if(act==='badge'){const b=prompt('Badge (emoji/текст, хоосон бол арилгана)');if(b===null)return;o.badge=b.trim().slice(0,12)||null}
+  else if(act==='ban'){if(id===me.id){alert('Өөрийгөө бан хийж болохгүй');return}o.banned=v}
+  else if(act==='avatar')o.avatar_url=null;
+  else if(act==='name'){const n=prompt('Шинэ нэр');if(!n)return;o.display_name=n.trim().slice(0,30)}
+  else{const u=prompt('Шинэ username');if(!u||!/^[a-z0-9_]{3,20}$/.test(u.toLowerCase())){alert('3-20 тэмдэгт, a-z 0-9 _');return}o.username=u.toLowerCase()}
+  const r=await sb.from('profiles').update(o).eq('id',id);if(r.error)alert('Алдаа: '+r.error.message);adminList();
+}
+
+/* ---------- E2EE (ECDH P-256 + AES-GCM) ---------- */
+const ECA={name:'ECDH',namedCurve:'P-256'};
+async function initKeys(){
+  try{
+    const st=localStorage.e2eePriv;
+    if(st&&prof.public_key){priv=await crypto.subtle.importKey('jwk',JSON.parse(st),ECA,false,['deriveKey']);return}
+    const kp=await crypto.subtle.generateKey(ECA,true,['deriveKey']);
+    localStorage.e2eePriv=JSON.stringify(await crypto.subtle.exportKey('jwk',kp.privateKey));priv=kp.privateKey;
+    await patchErr({public_key:JSON.stringify(await crypto.subtle.exportKey('jwk',kp.publicKey))});
+  }catch(e){priv=null}
+}
+async function sharedKey(p){
+  if(keyCache[p.id])return keyCache[p.id];
+  const pub=await crypto.subtle.importKey('jwk',JSON.parse(p.public_key),ECA,false,[]);
+  return keyCache[p.id]=await crypto.subtle.deriveKey({name:'ECDH',public:pub},priv,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function enc(bytes,k){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},k,bytes)),o=new Uint8Array(12+ct.length);o.set(iv);o.set(ct,12);return o}
+async function dec(buf,k){const u=new Uint8Array(buf);return crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},k,u.slice(12))}
+function b64(u){let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function encOn(){try{return !!cur&&localStorage['e2e_'+cur.id]==='1'}catch(e){return false}}
+function lockUI(){$('lock').textContent=encOn()?'🔒 E2EE':'🔓';$('ctext').placeholder=encOn()?'🔒 Шифрлэгдсэн мессеж...':'Мессеж...'}
+function toggleE2E(){
+  if(!priv||!cur.public_key){alert('Найз тань аппаа дахин нээж E2EE түлхүүрээ үүсгэх хэрэгтэй');return}
+  try{localStorage['e2e_'+cur.id]=encOn()?'0':'1'}catch(e){}lockUI();
+}
