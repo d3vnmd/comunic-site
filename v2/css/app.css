@@ -1,0 +1,29 @@
+:root{--bg:#120b07;--card:#1d130d;--card2:#27170f;--line:#43291a;--o:#db7a43;--o2:#ee9a62;--tx:#f7ebdf;--mu:#c7ab96;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font:400 16px/1.5 Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--tx);background:radial-gradient(900px 500px at 50% 0,#4a2a19,transparent 70%),var(--bg);-webkit-font-smoothing:antialiased;overflow:hidden}
+.hide{display:none!important}a{color:var(--o2)}
+.btn{min-height:44px;padding:0 20px;border:0;border-radius:999px;font:700 15px inherit;background:linear-gradient(135deg,var(--o2),var(--o));color:#2a1208;cursor:pointer;transition:transform .2s var(--ease)}
+.btn:active{transform:scale(.96)}.btn.s{min-height:38px;padding:0 14px}.btn.g{background:#ffffff12;color:var(--tx)}
+#loader{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:50;font:800 30px Inter;font-style:italic;letter-spacing:-.04em;transition:opacity .3s}#loader.gone{opacity:0;pointer-events:none}
+#auth{height:100%;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;padding:24px;text-align:center}
+#auth h1{font:800 44px Inter;font-style:italic;letter-spacing:-.05em}#auth p,#auth small{color:var(--mu)}#auth .btn{width:min(320px,100%);background:#5865F2;color:#fff}
+#app{height:100%;display:flex;flex-direction:column}
+.view{display:none;flex:1;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 16px) 16px 16px;overscroll-behavior:contain}.view.on{display:block}
+h2{font:800 28px Inter;letter-spacing:-.03em;margin-bottom:14px}
+#tabs{display:flex;background:#1a100aee;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+#tabs button{flex:1;padding:14px 4px;border:0;background:none;color:var(--mu);font:600 14px inherit;cursor:pointer}#tabs button.on{color:var(--o2)}
+.row{display:flex;align-items:center;gap:12px;width:100%;padding:12px;margin-bottom:8px;border:1px solid var(--line);border-radius:20px;background:var(--card);color:inherit;text-align:left;font:inherit;cursor:pointer}
+.row div{flex:1;min-width:0}.row b{display:block}.row small,.empty{color:var(--mu)}
+.av{flex:none;width:44px;height:44px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,#ffc66d,var(--o));display:grid;place-items:center;font-weight:800;color:#2a1208}
+#q,#ctext{width:100%;min-height:46px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--tx);font:inherit;outline:0;margin-bottom:12px}#q:focus,#ctext:focus{border-color:var(--o)}
+#chat{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg);z-index:20}#chat.on{display:flex;animation:in .3s var(--ease)}
+#chat header{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;border-bottom:1px solid var(--line)}
+#msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain}
+.b{max-width:80%;padding:9px 13px;border-radius:19px;word-break:break-word;animation:in .25s var(--ease)}
+.b.in{background:#2c1a10;align-self:flex-start;border-bottom-left-radius:6px}.b.out{background:linear-gradient(135deg,var(--o2),var(--o));color:#2a1208;align-self:flex-end;border-bottom-right-radius:6px}
+.b time{display:block;font-size:11px;opacity:.65;text-align:right}.b a{color:inherit}.am{display:block;max-width:100%;max-height:300px;border-radius:12px;margin-bottom:4px}.b audio{max-width:100%}
+#chat footer{display:flex;gap:8px;align-items:center;padding:10px 10px calc(env(safe-area-inset-bottom) + 10px);border-top:1px solid var(--line)}
+#chat footer #ctext{margin:0}.ib{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:18px;cursor:pointer}.ib.rec{background:#e5452f;animation:pulse 1s infinite}
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:var(--card2);border:1px solid var(--line);padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.3s var(--ease);z-index:60}#toast.on{opacity:1;transform:translate(-50%,0)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}@keyframes pulse{50%{opacity:.6}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
