@@ -1,0 +1,18 @@
+<!doctype html><html lang="mn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#120b07"><title>Comunic</title>
+<link rel="stylesheet" href="css/app.css"></head><body>
+<div id="loader"><b>comunic</b></div>
+<main id="auth" class="hide"><h1>comunic</h1><p>Ярианы шинэ гэр</p>
+<button class="btn" id="login">Discord-оор нэвтрэх</button>
+<small>Нэвтэрснээр <a href="/terms.html">Үйлчилгээний нөхцөл</a>, <a href="/privacy.html">Нууцлалын бодлого</a>-г зөвшөөрнө</small></main>
+<div id="app" class="hide">
+<section id="v-chats" class="view on"><h2>Чат</h2><div id="list"></div></section>
+<section id="v-find" class="view"><h2>Найз</h2><input id="q" placeholder="Нэрээр хайх..." autocomplete="off"><div id="fres"></div></section>
+<section id="v-me" class="view"><h2>Профайл</h2><div id="me"></div></section>
+<nav id="tabs"><button data-t="chats" class="on">💬 Чат</button><button data-t="find">🔍 Найз</button><button data-t="me">👤 Профайл</button></nav>
+<div id="chat"><header><button class="btn s" id="back">←</button><b id="cname"></b></header><div id="msgs"></div>
+<footer><label class="ib">📎<input type="file" id="file" multiple hidden></label><button class="ib" id="mic">🎤</button>
+<input id="ctext" maxlength="4000" placeholder="Мессеж..." autocomplete="off"><button class="btn" id="send">➤</button></footer></div>
+</div><div id="toast"></div>
+<script type="module" src="js/main.js"></script></body></html>
