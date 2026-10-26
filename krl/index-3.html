@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#151235">
+<title>Karoll, Азжаргал</title>
+<style>
+:root{--ink:#3a0b33;--pink:#ff2e93;--pink2:#d6107a;--bubble:#ff6bb0;--cream:#fff3f8;--mint:#6fffd0}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+background:radial-gradient(90% 55% at 50% 0%,#ffa6d4 0%,var(--bubble) 55%,#f2479d 100%);
+touch-action:manipulation;-webkit-user-select:none;user-select:none}
+textarea{-webkit-user-select:text;user-select:text}
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor}
+.hrt{color:var(--pink);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.18)}}
+
+#bg{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.fl{position:absolute;bottom:-50px;left:var(--x);width:var(--s);height:var(--s);color:#fff;opacity:0;will-change:transform,opacity;
+animation:fly var(--d) linear var(--dl) infinite}
+.fl .ic{width:100%;height:100%;vertical-align:top}
+@keyframes fly{0%{transform:translate3d(0,0,0) rotate(0);opacity:0}12%{opacity:.6}88%{opacity:.4}
+100%{transform:translate3d(var(--dx),-115vh,0) rotate(50deg);opacity:0}}
+#cv{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20;display:none}
+
+#mus{position:fixed;top:max(12px,env(safe-area-inset-top));right:14px;z-index:15;width:44px;height:44px;border-radius:14px;
+border:3px solid var(--ink);background:var(--cream);color:var(--ink);box-shadow:0 3px 0 var(--ink);font-size:21px;display:none;place-items:center}
+#mus.show{display:grid}
+#mus .mute,#mus.m .vol{display:none}
+#mus.m .mute{display:inline-block}
+
+.screen{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;
+padding:max(22px,env(safe-area-inset-top)) 20px max(26px,env(safe-area-inset-bottom));overflow-y:auto;overflow-x:hidden;
+opacity:0;visibility:hidden;transform:translateY(20px) scale(.98);
+transition:opacity .5s ease,transform .5s ease,visibility 0s .5s}
+.screen.on{opacity:1;visibility:visible;transform:none;transition:opacity .5s ease,transform .5s ease}
+.wrap{margin:auto 0;width:100%;max-width:440px}
+.card{background:var(--cream);border:3px solid var(--ink);border-radius:26px;padding:28px 22px;text-align:center;box-shadow:0 8px 0 var(--ink)}
+
+h1{font-size:27px;line-height:1.15;font-weight:900;letter-spacing:-.01em;margin:14px 0 8px}
+h2{font-size:30px;line-height:1.12;font-weight:900;letter-spacing:-.01em;margin:10px 0 12px}
+.sub{font-size:16px;line-height:1.5;opacity:.82}
+.tiny{font-size:13px;opacity:.6;margin-top:16px}
+.hint{min-height:22px;margin-top:6px;font-size:15px;color:var(--pink2);font-weight:800}
+.from{font-size:15px;color:var(--pink2);font-weight:900;margin:10px 0 8px}
+.env{font-size:92px;line-height:1;color:var(--pink);animation:bob 2.6s ease-in-out infinite;will-change:transform}
+@keyframes bob{50%{transform:translateY(-12px) rotate(-5deg)}}
+.av{width:68px;height:68px;border-radius:20px;margin:0 auto;display:grid;place-items:center;font-size:34px;font-weight:900;
+background:var(--mint);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);transform:rotate(-6deg)}
+
+.btn{border:3px solid var(--ink);border-radius:999px;font:inherit;font-weight:900;color:var(--ink);padding:14px 30px;font-size:18px;cursor:pointer}
+.go{background:var(--pink);color:#fff;box-shadow:0 5px 0 var(--ink);margin-top:22px;transition:transform .1s,box-shadow .1s}
+.go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.yw{display:flex;justify-content:center;margin-top:44px}
+.yes{position:relative;background:var(--pink);color:#fff;box-shadow:0 5px 0 var(--ink);
+transform:scale(var(--s,1));transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.yes::after{content:"";position:absolute;inset:-3px;border-radius:inherit;border:3px solid var(--pink);animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.4,1.6);opacity:0}}
+.slot{height:60px;margin-top:58px;display:flex;justify-content:center;align-items:center}
+.no{background:var(--cream);box-shadow:0 4px 0 var(--ink);font-size:16px;padding:11px 22px;white-space:nowrap;
+transition:transform .38s cubic-bezier(.3,1.35,.5,1)}
+.no.fx{position:fixed;left:0;top:0;z-index:12;will-change:transform}
+
+.top .wrap{margin:0 0 auto}
+.letter{text-align:left;padding:26px 20px}
+.letter h2{text-align:center;font-size:28px}
+.p{font-size:16px;line-height:1.65;margin-top:15px;opacity:0;transform:translateY(14px)}
+.on .p{opacity:1;transform:none;transition:opacity .8s ease,transform .8s ease;transition-delay:calc(var(--i)*.85s + .5s)}
+.sign{font-weight:900;font-size:18px;color:var(--pink2)}
+.reply textarea{width:100%;height:92px;resize:none;border-radius:18px;border:3px solid var(--ink);
+background:#fff;color:var(--ink);font:inherit;font-size:16px;padding:12px 14px;outline:none}
+.reply textarea::placeholder{color:rgba(58,11,51,.5)}
+.reply textarea:focus{border-color:var(--pink)}
+.reply .go{margin-top:14px;width:100%}
+.reply .tiny{text-align:center;margin-top:12px;min-height:18px}
+
+@media (prefers-reduced-motion:reduce){.fl{display:none}.env,.yes::after,.hrt{animation:none}.p{transition-delay:0s!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21.5C5 17 2 13.4 2 9.6 2 6.6 4.3 4.5 7 4.5c2 0 3.7 1.1 5 3 1.3-1.9 3-3 5-3 2.7 0 5 2.1 5 5.100 0 3.800-3 7.400-10 11.900z"/></symbol>
+<symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 2c.7 5.200 3.800 8.300 10 10-6.200 1.700-9.300 4.800-10 10-.7-5.200-3.800-8.300-10-10 6.200-1.700 9.300-4.800 10-10z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.500l2.900 6.100 6.600.8-4.900 4.600 1.300 6.600-5.900-3.300-5.900 3.300 1.300-6.600L2.500 9.400l6.600-.8z"/></symbol>
+<symbol id="i-pad" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.500 7.500h11A4.500 4.500 0 0 1 22 12v2a3 3 0 0 1-5.300 1.900L15 14H9l-1.700 1.900A3 3 0 0 1 2 14v-2a4.500 4.500 0 0 1 4.500-4.500z"/><path d="M7.500 10v3M6 11.500h3"/></g><circle cx="16.500" cy="10.800" r="1.100"/><circle cx="18.800" cy="12.800" r="1.100"/></symbol>
+<symbol id="i-env" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3.500"/><path d="M3.800 7.800L12 13.600l8.200-5.800" fill="none" stroke="#fff3f8" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.500 14.800A9 9 0 0 1 9.200 3.500a9 9 0 1 0 11.300 11.300z"/></symbol>
+<symbol id="i-vol" viewBox="0 0 24 24"><path d="M3 9.500v5h3.500l4.500 4v-13l-4.500 4H3z"/><path d="M14.500 9a4 4 0 0 1 0 6M17.500 6.200a8 8 0 0 1 0 11.600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-mute" viewBox="0 0 24 24"><path d="M3 9.500v5h3.500l4.500 4v-13l-4.500 4H3z"/><path d="M15 9.500l5.500 5m0-5l-5.500 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M3.500 11.500l17-8-8 17-2.200-7.300z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+</defs></svg>
+<div id="bg"></div>
+<canvas id="cv"></canvas>
+<button id="mus" aria-label="Хөгжим асаах, унтраах"><svg class="ic vol"><use href="#i-vol"/></svg><svg class="ic mute"><use href="#i-mute"/></svg></button>
+
+<section class="screen on" id="s0"><div class="wrap card">
+  <div class="env"><svg class="ic"><use href="#i-env"/></svg></div>
+  <h1>Чамд нэг зурвас ирлээ</h1>
+  <p class="sub">Нээхийн тулд товш</p>
+  <button class="btn go" id="open">Нээх <svg class="ic"><use href="#i-sparkle"/></svg></button>
+  <p class="tiny">Чихэвчээр үзвэл илүү гоё</p>
+</div></section>
+
+<section class="screen" id="s1"><div class="wrap">
+  <div class="card">
+    <div class="av">K</div>
+    <p class="from">Karoll, Азжаргал</p>
+    <p class="sub" id="greet"></p>
+    <h2>Надтай үерхэх үү? <svg class="ic hrt"><use href="#i-heart"/></svg></h2>
+    <p class="hint" id="hint">Чамаас нэг юм асуух гэсэн юм...</p>
+  </div>
+  <div class="yw"><button class="btn yes" id="yes">Тийм <svg class="ic"><use href="#i-heart"/></svg></button></div>
+  <div class="slot" id="slot"><button class="btn no" id="no">Үгүй</button></div>
+</div></section>
+
+<section class="screen top" id="s2"><div class="wrap"><div class="card letter">
+  <h2>Баярлалаа <svg class="ic hrt"><use href="#i-heart"/></svg></h2>
+  <p class="p" style="--i:0">Хэрвээ чи энийг уншиж байгаа бол тийм гэж хэлсэн гэсэн үг шүү. Би яг одоо ямар царайтай байгаагаа мэдэхгүй ч инээж байгаа нь лавтай.</p>
+  <p class="p" style="--i:1">Бид онлайнаар танилцсан даа. Эхэндээ зүгээр л хамт тоглож, чатлаж явсан. Хэзээнээс чамтай ярихгүй өдөр жаахан хоосон санагддаг болсныг би өөрөө ч анзаарсангүй.</p>
+  <p class="p" style="--i:2">Чамтай Roblox тоглох болгонд цаг яаж өнгөрснийг мэдэхгүй. Чи хөгжилтэй, хүнд сайхан ханддаг. Шүдний аппараттай инээмсэглэл чинь хүртэл надад гоё санагддаг шүү <svg class="ic hrt"><use href="#i-sparkle"/></svg> Чи инээгээд л байгаарай.</p>
+  <p class="p" style="--i:3">Чамд нэг амлалт өгье. Би чамайг хэзээ ч шоолохгүй, үргэлж дэмжинэ. Чамд таалагдахгүй юм байвал шууд хэлээрэй, би сонсоно.</p>
+  <p class="p" style="--i:4">Яарах юм алга. Бага багаар, өдөр бүр ярьж, хамт тоглож явъя. Хэзээ нэгэн өдөр Roblox дээр хамгийн гоё map-аа хамт бүтээе <svg class="ic hrt"><use href="#i-pad"/></svg></p>
+  <p class="p sign" style="--i:5">Чамд маш их баярлалаа<br>Karoll, Азжаргал <svg class="ic hrt"><use href="#i-heart"/></svg></p>
+  <div class="p reply" style="--i:6">
+    <textarea id="msg" maxlength="300" placeholder="Надад хариу бичих үү?"></textarea>
+    <button class="btn go" id="send">Илгээх <svg class="ic"><use href="#i-send"/></svg></button>
+    <p class="tiny" id="st"></p>
+  </div>
+</div></div></section>
+
+<section class="screen" id="s3"><div class="wrap card">
+  <div class="env"><svg class="ic"><use href="#i-moon"/></svg></div>
+  <h1>Ойлголоо</h1>
+  <p class="sub">Үнэнээр хариулсанд баярлалаа. Найз хэвээрээ үлдээд хамт тоглож л байя.</p>
+</div></section>
+
+<script>
+/* ===== ЭНДЭЭС ЗАСНА ===== */
+const CONFIG={
+  HER_NAME:"",                                   // охины нэр (хоосон байж болно)
+  WEBHOOK_URL:"https://discord.com/api/webhooks/1564211861111439503/1T-FRY6yG8QSaKvHz1KqxDT_41MtUQg0QUQsIjtr9Wa-r397a5hkAfdT5SbF_loW7i0v"  // бүтнээр нь энд тавь
+};
+/* ======================== */
+
+const $=id=>document.getElementById(id);
+const screens=[0,1,2,3].map(i=>$('s'+i));
+const show=i=>screens.forEach((s,k)=>s.classList.toggle('on',k===i));
+const nm=CONFIG.HER_NAME?', '+CONFIG.HER_NAME:'';
+$('greet').textContent='Сайн уу'+nm+'! Чамд чухал юм хэлэх гэсэн юм.';
+
+/* Webhook */
+function send(text){
+  if(!/^https:\/\//.test(CONFIG.WEBHOOK_URL))return Promise.resolve(false);
+  return fetch(CONFIG.WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:'Karoll',content:text.slice(0,1800),text:text.slice(0,1800)})})
+    .then(r=>r.ok).catch(()=>false);
+}
+
+/* Хөвөгч зүрх, од */
+(function(){
+  const bg=$('bg'),em=['heart','sparkle','star','heart','pad','sparkle'];
+  for(let i=0;i<14;i++){
+    const e=document.createElement('span');e.className='fl';e.innerHTML='<svg class="ic"><use href="#i-'+em[i%em.length]+'"/></svg>';
+    e.style.cssText=`--x:${Math.random()*92}%;--s:${16+Math.random()*16}px;--d:${9+Math.random()*8}s;--dl:${-Math.random()*14}s;--dx:${(Math.random()-.5)*80}px`;
+    bg.appendChild(e);
+  }
+})();
+
+/* Chill хөгжим (Web Audio, гадны файл шаардахгүй) */
+const Music=(()=>{
+  let ctx,master,timer,step=0,nextT=0,on=false,noise;
+  const ch=[[48,55,59,64],[45,52,57,60],[41,48,52,57],[43,50,55,59]];
+  const hz=n=>440*Math.pow(2,(n-69)/12), D=60/74/2;
+  function init(){
+    ctx=new(window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain();master.gain.value=0;
+    const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
+    const dl=ctx.createDelay();dl.delayTime.value=D*3;
+    const fb=ctx.createGain();fb.gain.value=.3;const dg=ctx.createGain();dg.gain.value=.35;
+    master.connect(lp);lp.connect(ctx.destination);
+    master.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(dg);dg.connect(lp);
+    noise=ctx.createBuffer(1,ctx.sampleRate*.06,ctx.sampleRate);
+    const d=noise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }
+  function note(m,t,dur,type,vol,att){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.value=hz(m);o.detune.value=(Math.random()-.5)*10;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+  }
+  function kick(t){
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);
+    g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+.25);
+  }
+  function hat(t){
+    const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();
+    s.buffer=noise;f.type='highpass';f.frequency.value=7500;
+    g.gain.setValueAtTime(.035,t);g.gain.exponentialRampToValueAtTime(.0001,t+.05);
+    s.connect(f);f.connect(g);g.connect(master);s.start(t);
+  }
+  function play(s,t){
+    const c=ch[(s>>3)&3],k=s%8;
+    if(k===0)c.forEach(m=>note(m,t,D*8,'sine',.1,.3));
+    if(k===0||k===5)kick(t);
+    if(k%2===1)hat(t);
+    if([0,3,5,6].includes(k))note(c[(s*3)%4]+12,t,D*2.5,'triangle',.07,.01);
+  }
+  function tick(){
+    if(nextT<ctx.currentTime-.1)nextT=ctx.currentTime+.05;
+    while(nextT<ctx.currentTime+.4){play(step,nextT+(step%2?.014:0));nextT+=D;step++;}
+  }
+  function start(){
+    if(!ctx)init();
+    ctx.resume();nextT=ctx.currentTime+.1;clearInterval(timer);timer=setInterval(tick,120);
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(master.gain.value,ctx.currentTime);
+    master.gain.linearRampToValueAtTime(.6,ctx.currentTime+2.5);
+    on=true;
+  }
+  function stop(){
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(master.gain.value,ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0,ctx.currentTime+.4);
+    setTimeout(()=>{if(!on)clearInterval(timer)},500);on=false;
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(!ctx)return;document.hidden?ctx.suspend():(on&&ctx.resume());
+  });
+  return{start,stop,get on(){return on}};
+})();
+$('mus').onclick=()=>{Music.on?Music.stop():Music.start();$('mus').classList.toggle('m',!Music.on);};
+
+/* Нээх */
+$('open').onclick=()=>{
+  try{Music.start();}catch(e){}
+  $('mus').classList.add('show');show(1);
+};
+
+/* Үгүй товч зугтдаг, Тийм томорно */
+const yes=$('yes'),no=$('no'),slot=$('slot'),hint=$('hint');
+const hints=['Чамаас нэг юм асуух гэсэн юм...','Хөөе, хаачав аа?','Барьж үз дээ','Тийм товч томорч байна шүү','Бодоод үз дээ','Хүснэ ээ','Сүүлийн боломж...'];
+const labels=['Үгүй','Үнэн үү?','Үгүй...','Бодоод үз','Хүснэ ээ','Дахин бод'];
+const MAXD=6;
+let n=0,fixed=false,caught=false,done=false;
+
+function place(x,y,anim){
+  no.style.transition=anim?'':'none';
+  no.style.transform=`translate3d(${x}px,${y}px,0)`;
+}
+function dodge(){
+  n++;
+  yes.style.setProperty('--s',Math.min(1+n*.15,1.9));
+  hint.textContent=hints[Math.min(n,hints.length-1)];
+  if(n>=MAXD){release();return;}
+  no.textContent=labels[n];
+  if(!fixed){
+    const r=no.getBoundingClientRect();
+    no.classList.add('fx');place(r.left,r.top,false);void no.offsetWidth;fixed=true;
+  }
+  const w=no.offsetWidth,h=no.offsetHeight,vw=innerWidth,vh=innerHeight,m=14,yr=yes.getBoundingClientRect();
+  let x,y,t=0;
+  do{
+    x=m+Math.random()*(vw-w-2*m);
+    y=70+Math.random()*(vh-h-70-m-24);t++;
+  }while(t<30&&x<yr.right+10&&x+w>yr.left-10&&y<yr.bottom+10&&y+h>yr.top-10);
+  place(x,y,true);
+  if(navigator.vibrate)navigator.vibrate(18);
+}
+function release(){
+  caught=true;no.textContent='Үгүй гэж хэлье';
+  const s=slot.getBoundingClientRect();
+  place(s.left+(s.width-no.offsetWidth)/2,s.top+(s.height-no.offsetHeight)/2,true);
+}
+no.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(done)return;
+  if(!caught){dodge();return;}
+  done=true;show(3);
+  send('🌙 Хариу: ҮГҮЙ гэсэн. "Үгүй" товчийг '+n+' удаа дарахыг оролдсон. Найз хэвээрээ үлдээрэй.');
+});
+no.addEventListener('click',e=>e.preventDefault());
+
+/* Тийм */
+yes.addEventListener('click',()=>{
+  if(done)return;done=true;
+  no.style.visibility='hidden';
+  show(2);confetti();
+  if(navigator.vibrate)navigator.vibrate([40,40,80]);
+  send('💖 Хариу: ТИЙМ гэсэн!!! ('+n+' удаа "Үгүй" товчийг барих гэж оролдсон)');
+});
+
+/* Хариу бичих */
+let sending=false;
+$('send').onclick=async()=>{
+  const t=$('msg').value.trim();
+  if(!t){$('st').textContent='Эхлээд юм бичээрэй';return;}
+  if(sending)return;sending=true;$('st').textContent='Илгээж байна...';
+  const ok=await send('💬 Хариу бичсэн: '+t);
+  sending=false;
+  $('st').textContent=ok?'Илгээгдлээ. Баярлалаа!':'Илгээж чадсангүй. Дахин оролдоорой.';
+  if(ok)$('msg').value='';
+};
+
+/* Confetti (3.8 секунд, дараа нь зогсоно) */
+function confetti(){
+  const c=$('cv'),x=c.getContext('2d'),d=Math.min(devicePixelRatio||1,2),W=innerWidth,H=innerHeight;
+  c.width=W*d;c.height=H*d;x.scale(d,d);c.style.display='block';
+  const cols=['#ff4f9a','#ffe27a','#b9a2ff','#7cf5d0','#ffffff'];
+  const P=Array.from({length:90},()=>({x:W/2,y:H*.55,vx:(Math.random()-.5)*15,vy:-Math.random()*15-5,
+    s:6+Math.random()*7,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[Math.random()*5|0],h:Math.random()<.4}));
+  const t0=performance.now();
+  (function f(t){
+    const el=t-t0;x.clearRect(0,0,W,H);
+    for(const p of P){
+      p.vy+=.3;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+      x.save();x.translate(p.x,p.y);x.rotate(p.r);
+      x.globalAlpha=Math.max(0,1-el/3800);x.fillStyle=p.c;
+      if(p.h){const s=p.s;x.beginPath();x.moveTo(0,s*.3);
+        x.bezierCurveTo(-s,-s*.4,-s*.4,-s,0,-s*.35);x.bezierCurveTo(s*.4,-s,s,-s*.4,0,s*.3);x.fill();}
+      else x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);
+      x.restore();
+    }
+    if(el<3800)requestAnimationFrame(f);else{x.clearRect(0,0,W,H);c.style.display='none';}
+  })(t0);
+}
+</script>
+</body>
+</html>
